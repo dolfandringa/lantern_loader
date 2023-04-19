@@ -22,7 +22,7 @@ func DownloadWorker(
 		case <-ctx.Done():
 			return nil
 		}
-		chunk, err := DownloadChunk(job.start, job.stop, url)
+		chunk, err := DownloadChunk(job.Start, job.Stop, url)
 		if err != nil {
 			errorChan <- job
 		}

@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func DownloadChunk(start, end int, url string) ([]byte, error) {
+func DownloadChunk(start, end uint64, url string) ([]byte, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", start, end))
 
