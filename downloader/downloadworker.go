@@ -2,7 +2,7 @@ package downloader
 
 import (
 	"context"
-	"time"
+	"fmt"
 )
 
 func DownloadWorker(
@@ -14,16 +14,19 @@ func DownloadWorker(
 	ctx context.Context,
 ) {
 	var job Job
+	fmt.Println("Starting worker for url", url)
 	for {
 		select {
 		case job = <-jobChan:
-		case <-time.After(time.Duration(timeout) * time.Second):
-			return
 		case <-ctx.Done():
 			return
 		}
+		fmt.Println("Fetching job", job)
 		chunk, err := DownloadChunk(job.Start, job.Stop, url)
+		fmt.Println("Finished fetching job", job)
 		if err != nil {
+			fmt.Println(err)
+			fmt.Println("Writing error", job)
 			errorChan <- job
 		}
 		writerChan <- chunk

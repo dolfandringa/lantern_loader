@@ -1,6 +1,7 @@
 package downloader
 
 type Job struct {
-	Start int
-	Stop  int
+	Start   int
+	Stop    int
+	Retries int
 }

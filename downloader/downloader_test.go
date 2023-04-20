@@ -76,3 +76,42 @@ func TestDownloadChunkWrongUrl(t *testing.T) {
 	_, err := DownloadChunk(wantStart, wantStop, wantUrl)
 	st.Reject(t, err, nil)
 }
+
+func TestGetSizeMissingContentLength(t *testing.T) {
+	wantUrl := "https://fake.url/file"
+	defer gock.Off()
+	gock.New(wantUrl).
+		Head("/").
+		Reply(200)
+	_, err := GetSize(wantUrl)
+	st.Reject(t, err, nil)
+}
+
+func TestGetSize(t *testing.T) {
+	wantUrl := "https://fake.url/file"
+	want := 50000
+	defer gock.Off()
+	gock.New(wantUrl).
+		Head("/").
+		Reply(200).
+		AddHeader("Content-Length", fmt.Sprint(want))
+	got, err := GetSize(wantUrl)
+	st.Expect(t, err, nil)
+	st.Expect(t, got, want)
+}
+
+func TestGetSizeCatch405(t *testing.T) {
+	wantUrl := "https://fake.url/file"
+	want := 50000
+	defer gock.Off()
+	gock.New(wantUrl).
+		Get("/").
+		Reply(200).
+		AddHeader("Content-Length", fmt.Sprint(want))
+	gock.New(wantUrl).
+		Head("/").
+		Reply(405)
+	got, err := GetSize(wantUrl)
+	st.Expect(t, err, nil)
+	st.Expect(t, got, want)
+}
