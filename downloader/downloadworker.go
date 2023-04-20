@@ -12,15 +12,15 @@ func DownloadWorker(
 	errorChan chan<- Job,
 	writerChan chan<- []byte,
 	ctx context.Context,
-) error {
+) {
 	var job Job
 	for {
 		select {
 		case job = <-jobChan:
 		case <-time.After(time.Duration(timeout) * time.Second):
-			return nil
+			return
 		case <-ctx.Done():
-			return nil
+			return
 		}
 		chunk, err := DownloadChunk(job.Start, job.Stop, url)
 		if err != nil {

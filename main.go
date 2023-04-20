@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"log"
-	"math"
 	"os"
 
 	"lantern_loader/downloader"
+	"lantern_loader/utils"
 )
 
 const HELP string = `
@@ -27,9 +27,9 @@ func main() {
 	errorChan := make(chan downloader.Job, len(urls))
 	writerChan := make(chan []byte, len(urls))
 	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
+	//ctx, cancel := context.WithCancel(ctx)
 	for i := 0; i < fileSize; i += chunkSize {
-		chunkChan <- downloader.Job{i, int(math.Min(float64(i+chunkSize-1), float64(fileSize)))}
+		chunkChan <- downloader.Job{Start: i, Stop: int(utils.Min(i+chunkSize-1, fileSize))}
 	}
 	// TODO: Fetch file size and name
 	// Start writer
