@@ -39,7 +39,6 @@ func Downloader(urls []string) {
 	wg_size.Wait()
 	const chunkSize = 1024 * 1024 * 10
 	numChunks := int(math.Ceil(float64(fileInfo.size) / float64(chunkSize)))
-	bar := progressbar.DefaultBytes(fileInfo.size)
 	chunkChan := make(chan Job, numChunks)
 	errorChan := make(chan Job, numChunks)
 	writerChan := make(chan Chunk, numChunks)
@@ -57,6 +56,8 @@ func Downloader(urls []string) {
 		FileWriter(fileInfo.filename, writerChan, writerErrorChan, ctx)
 	}()
 
+	bar := progressbar.DefaultBytes(fileInfo.size)
+	bar.Clear()
 	for _, url := range urls {
 		wg.Add(1)
 		go func(url string) {
