@@ -8,8 +8,7 @@ import (
 	"strconv"
 )
 
-func DownloadChunk(start, end int, url string) ([]byte, error) {
-	return nil, errors.New("SOme error")
+func DownloadChunk(start, end int64, url string) ([]byte, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -20,8 +19,8 @@ func DownloadChunk(start, end int, url string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if res.StatusCode != 200 {
-		return nil, errors.New("We didn't receive status 200")
+	if res.StatusCode != 200 && res.StatusCode != 206 {
+		return nil, fmt.Errorf("We received status code %v instead of 200", res.StatusCode)
 	}
 	defer res.Body.Close()
 	resBody, err := io.ReadAll(res.Body)
@@ -32,7 +31,7 @@ func DownloadChunk(start, end int, url string) ([]byte, error) {
 
 }
 
-func GetSize(url string) (int, error) {
+func GetSize(url string) (int64, error) {
 	req, err := http.NewRequest("HEAD", url, nil)
 	if err != nil {
 		return 0, err
@@ -63,5 +62,5 @@ func GetSize(url string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	return int(size), nil
+	return int64(size), nil
 }

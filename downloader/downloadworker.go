@@ -19,15 +19,15 @@ func DownloadWorker(
 		select {
 		case job = <-jobChan:
 		case <-ctx.Done():
+			fmt.Println("Cancelled", url)
 			return
 		}
 		fmt.Println("Fetching job", job)
 		chunk, err := DownloadChunk(job.Start, job.Stop, url)
-		fmt.Println("Finished fetching job", job)
 		if err != nil {
-			fmt.Println(err)
-			fmt.Println("Writing error", job)
+			fmt.Println("Error while downlinking", err)
 			errorChan <- job
+			continue
 		}
 		writerChan <- chunk
 	}
