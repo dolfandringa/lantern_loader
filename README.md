@@ -1,5 +1,5 @@
 # Lantern Loader
-![Unittesting](https://github.com/dolfandringa/lantern_loader/actions/workflows/go.yml/badge.svg)
+[![Unittesting](https://github.com/dolfandringa/lantern_loader/actions/workflows/go.yml/badge.svg)](https://github.com/dolfandringa/lantern_loader/actions/workflows/go.yml)
 
 
 ## Compiling
