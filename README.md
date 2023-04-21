@@ -1,4 +1,6 @@
 # Lantern Loader
+![Unittesting](https://github.com/dolfandringa/lantern_loader/actions/workflows/go.yml/badge.svg)
+
 
 ## Compiling
 `go build -o bin`
