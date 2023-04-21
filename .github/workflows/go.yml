@@ -21,10 +21,12 @@ jobs:
           go-version: 1.19
 
       - name: Build
-        run: go build -v ./...
+        run: go build -o /home/runner/ -v ./...
 
       - name: Show files
-        run: ls
+        run:
+          - ls
+          - ls /home/runner/
 
       - name: Test
         run: go test -v ./...
@@ -35,4 +37,4 @@ jobs:
           # Artifact name
           name: lantern_loader
           # Destination path
-          path: lantern_loader # optional
+          path: /home/runner/lantern_loader # optional
