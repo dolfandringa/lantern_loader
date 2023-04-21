@@ -5,35 +5,34 @@ name: Go
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 1.19
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
 
-    - name: Build
-      run: go build -o bin -v ./...
+      - name: Build
+        run: go build -v ./...
 
-    - name: Show files
-      run: ls
+      - name: Show files
+        run: ls
 
-    - name: Test
-      run: go test -v ./...
-    
-    - name: Download Build Artifact
-      uses: actions/download-artifact@v2.1.1
-      with:
-        # Artifact name
-        name: lantern_loader
-        # Destination path
-        path: bin/lantern_loader # optional
+      - name: Test
+        run: go test -v ./...
+
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v2.1.1
+        with:
+          # Artifact name
+          name: lantern_loader
+          # Destination path
+          path: lantern_loader # optional
