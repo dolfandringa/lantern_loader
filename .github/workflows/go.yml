@@ -22,15 +22,18 @@ jobs:
         go-version: 1.19
 
     - name: Build
-      run: go build -v ./...
+      run: go build -o bin -v ./...
+
+    - name: Show files
+      run: ls
 
     - name: Test
       run: go test -v ./...
     
-    - name: Download a Build Artifact
+    - name: Download Build Artifact
       uses: actions/download-artifact@v2.1.1
       with:
         # Artifact name
-        name: ./bin/lantern_loader
+        name: lantern_loader
         # Destination path
-        # path: # optional
+        path: bin/lantern_loader # optional
