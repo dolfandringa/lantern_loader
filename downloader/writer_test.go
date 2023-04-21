@@ -2,7 +2,6 @@ package downloader
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"testing"
 
@@ -38,8 +37,6 @@ func TestWriteChunk(t *testing.T) {
 	mF.On("Close").Return(nil)
 	mF.On("WriteAt", data, int64(10)).Return(len(data), nil)
 	mFS.On("Create", fname).Return(mF, nil)
-	fmt.Println("mF:", mF)
-	fmt.Println("mFS:", mFS)
 	chunkChan := make(chan Chunk, 2)
 	errorChan := make(chan Chunk, 2)
 	chunk := Chunk{Start: 10, Stop: int64(10 + len(data)), data: data}
@@ -47,7 +44,7 @@ func TestWriteChunk(t *testing.T) {
 	chunkChan <- chunk
 	wg.Add(1)
 	go func() {
-		Filewriter(fname, chunkChan, errorChan, ctx)
+		FileWriter(fname, chunkChan, errorChan, ctx)
 		wg.Done()
 	}()
 	for len(chunkChan) > 0 {

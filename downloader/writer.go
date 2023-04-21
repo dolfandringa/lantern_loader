@@ -23,7 +23,7 @@ func (*osFS) Create(filename string) (file, error) { return os.Create(filename) 
 
 var dfFS fileSystem = &osFS{}
 
-func Filewriter(
+func FileWriter(
 	filename string,
 	chunkChan <-chan Chunk,
 	errorChan chan<- Chunk,
@@ -45,6 +45,7 @@ func Filewriter(
 				errorChan <- chunk
 			}
 		case <-ctx.Done():
+			fmt.Println("Cancelled writer")
 			return
 		}
 	}

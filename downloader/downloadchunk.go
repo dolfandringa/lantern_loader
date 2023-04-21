@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strconv"
+	"strings"
 )
 
 func DownloadChunk(start, end int64, url string) ([]byte, error) {
@@ -31,36 +33,40 @@ func DownloadChunk(start, end int64, url string) ([]byte, error) {
 
 }
 
-func GetSize(url string) (int64, error) {
-	req, err := http.NewRequest("HEAD", url, nil)
+func GetFileInfo(uri string) (FileInfo, error) {
+	//TODO, should actually check Accept-Ranges header here, to see what ranges are accepted and return that in FileInfo
+	req, err := http.NewRequest("HEAD", uri, nil)
 	if err != nil {
-		return 0, err
+		return FileInfo{}, err
 	}
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return 0, err
+		return FileInfo{}, err
 	}
 	defer res.Body.Close()
 	if res.StatusCode == 405 {
-		req, err = http.NewRequest("GET", url, nil)
+		req, err = http.NewRequest("GET", uri, nil)
 		if err != nil {
-			return 0, err
+			return FileInfo{}, err
 		}
 		res, err = http.DefaultClient.Do(req)
 		if err != nil {
-			return 0, err
+			return FileInfo{}, err
 		}
 	}
 	if res.StatusCode != 200 {
-		return 0, fmt.Errorf("We received status code %v", res.StatusCode)
+		return FileInfo{}, fmt.Errorf("We received status code %v", res.StatusCode)
 	}
 	if len(res.Header["Content-Length"]) == 0 {
-		return 0, errors.New("No Content-Length header present.")
+		return FileInfo{}, errors.New("No Content-Length header present.")
 	}
 	sizeStr := res.Header["Content-Length"][0]
-	size, err := strconv.ParseInt(sizeStr, 10, 0)
+	size, err := strconv.ParseInt(sizeStr, 10, 64)
 	if err != nil {
-		return 0, err
+		return FileInfo{}, err
 	}
-	return int64(size), nil
+	u, _ := url.Parse(uri)
+	parts := strings.Split(u.Path, "/")
+	filename := parts[len(parts)-1]
+	return FileInfo{size: size, filename: filename}, nil
 }

@@ -3,6 +3,8 @@ package downloader
 import (
 	"context"
 	"fmt"
+
+	"github.com/schollz/progressbar/v3"
 )
 
 func DownloadWorker(
@@ -10,8 +12,9 @@ func DownloadWorker(
 	timeout int,
 	jobChan <-chan Job,
 	errorChan chan<- Job,
-	writerChan chan<- []byte,
+	writerChan chan<- Chunk,
 	ctx context.Context,
+	bar *progressbar.ProgressBar,
 ) {
 	var job Job
 	fmt.Println("Starting worker for url", url)
@@ -22,13 +25,13 @@ func DownloadWorker(
 			fmt.Println("Cancelled", url)
 			return
 		}
-		fmt.Println("Fetching job", job)
 		chunk, err := DownloadChunk(job.Start, job.Stop, url)
 		if err != nil {
 			fmt.Println("Error while downlinking", err)
 			errorChan <- job
-			continue
+			break
 		}
-		writerChan <- chunk
+		_ = bar.Add64(int64(job.Stop - job.Start))
+		writerChan <- Chunk{data: chunk, Start: job.Start, Stop: job.Stop}
 	}
 }

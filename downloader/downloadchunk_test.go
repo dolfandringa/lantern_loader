@@ -21,7 +21,7 @@ func TestDownloadChunk(t *testing.T) {
 		Reply(200).
 		Body(bytes.NewBuffer(want))
 	got, err := DownloadChunk(wantStart, wantStop, wantUrl)
-	assert.Equal(t, err, nil)
+	assert.Equal(t, nil, err)
 	assert.Equal(t, want, got)
 }
 
@@ -37,7 +37,7 @@ func TestDownloadChunkWith206(t *testing.T) {
 		Reply(206).
 		Body(bytes.NewBuffer(want))
 	got, err := DownloadChunk(wantStart, wantStop, wantUrl)
-	assert.Equal(t, err, nil)
+	assert.Equal(t, nil, err)
 	assert.Equal(t, want, got)
 }
 
@@ -93,41 +93,41 @@ func TestDownloadChunkWrongUrl(t *testing.T) {
 	assert.NotEqual(t, err, nil)
 }
 
-func TestGetSizeMissingContentLength(t *testing.T) {
+func TestGetFileInfoMissingContentLength(t *testing.T) {
 	wantUrl := "https://fake.url/file"
 	defer gock.Off()
 	gock.New(wantUrl).
 		Head("/").
 		Reply(200)
-	_, err := GetSize(wantUrl)
+	_, err := GetFileInfo(wantUrl)
 	assert.NotEqual(t, err, nil)
 }
 
-func TestGetSize(t *testing.T) {
-	wantUrl := "https://fake.url/file"
-	var want int64 = 50000
+func TestGetFileInfo(t *testing.T) {
+	wantUrl := "https://fake.url/file.txt#test?q=1&r=2"
+	want := FileInfo{size: 50000, filename: "file.txt"}
 	defer gock.Off()
 	gock.New(wantUrl).
 		Head("/").
 		Reply(200).
-		AddHeader("Content-Length", fmt.Sprint(want))
-	got, err := GetSize(wantUrl)
-	assert.Equal(t, err, nil)
-	assert.Equal(t, got, want)
+		AddHeader("Content-Length", fmt.Sprint(want.size))
+	got, err := GetFileInfo(wantUrl)
+	assert.Equal(t, nil, err)
+	assert.Equal(t, want, got)
 }
 
-func TestGetSizeCatch405(t *testing.T) {
-	wantUrl := "https://fake.url/file"
-	var want int64 = 50000
+func TestGetFileInfoCatch405(t *testing.T) {
+	wantUrl := "https://fake.url/file.txt"
+	want := FileInfo{size: 50000, filename: "file.txt"}
 	defer gock.Off()
 	gock.New(wantUrl).
 		Get("/").
 		Reply(200).
-		AddHeader("Content-Length", fmt.Sprint(want))
+		AddHeader("Content-Length", fmt.Sprint(want.size))
 	gock.New(wantUrl).
 		Head("/").
 		Reply(405)
-	got, err := GetSize(wantUrl)
-	assert.Equal(t, err, nil)
-	assert.Equal(t, got, want)
+	got, err := GetFileInfo(wantUrl)
+	assert.Equal(t, nil, err)
+	assert.Equal(t, want, got)
 }
