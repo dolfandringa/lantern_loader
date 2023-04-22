@@ -42,6 +42,7 @@ func Downloader(urls []string) {
 	chunkChan := make(chan Job, numChunks)
 	errorChan := make(chan Job, numChunks)
 	writerChan := make(chan Chunk, numChunks)
+	completeChan := make(chan Chunk, numChunks)
 	writerErrorChan := make(chan Chunk, numChunks)
 	ctx, cancel = context.WithCancel(parent_ctx)
 	wg := sync.WaitGroup{}
@@ -53,19 +54,20 @@ func Downloader(urls []string) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		FileWriter(fileInfo.filename, writerChan, writerErrorChan, ctx)
+		FileWriter(fileInfo.filename, writerChan, writerErrorChan, completeChan, ctx)
 	}()
 
-	bar := progressbar.DefaultBytes(fileInfo.size)
-	bar.Clear()
 	for _, url := range urls {
 		wg.Add(1)
 		go func(url string) {
 			defer wg.Done()
-			DownloadWorker(url, 10, chunkChan, errorChan, writerChan, ctx, bar)
+			DownloadWorker(url, 10, chunkChan, errorChan, writerChan, ctx)
 		}(url)
 	}
-	for (len(chunkChan) > 0 || len(errorChan) > 0 || len(writerChan) > 0) && ctx.Err() == nil {
+	bar := progressbar.DefaultBytes(fileInfo.size)
+	bar.Clear()
+	completeChunks := 0
+	for completeChunks < numChunks && ctx.Err() == nil {
 		select {
 		case errorJob := <-errorChan:
 			if errorJob.Retries < 5 {
@@ -78,9 +80,13 @@ func Downloader(urls []string) {
 		case writeError := <-writerErrorChan:
 			fmt.Println("Error writing chunk", writeError.Start)
 			cancel()
+		case <-completeChan:
+			completeChunks += 1
+			bar.Add(chunkSize)
 		}
 
 	}
+	fmt.Println("Done downloading. Quitting")
 	//time.Sleep(1 * time.Second)
 	cancel()
 	wg.Wait()

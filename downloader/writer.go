@@ -27,6 +27,7 @@ func FileWriter(
 	filename string,
 	chunkChan <-chan Chunk,
 	errorChan chan<- Chunk,
+	completeChan chan<- Chunk,
 	ctx context.Context,
 ) {
 	//TODO handle existing file.
@@ -44,6 +45,7 @@ func FileWriter(
 				fmt.Println(err)
 				errorChan <- chunk
 			}
+			completeChan <- chunk
 		case <-ctx.Done():
 			fmt.Println("Cancelled writer")
 			return

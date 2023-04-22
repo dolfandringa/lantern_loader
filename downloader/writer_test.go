@@ -5,6 +5,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -39,12 +40,13 @@ func TestWriteChunk(t *testing.T) {
 	mFS.On("Create", fname).Return(mF, nil)
 	chunkChan := make(chan Chunk, 2)
 	errorChan := make(chan Chunk, 2)
+	completeChan := make(chan Chunk, 2)
 	chunk := Chunk{Start: 10, Stop: int64(10 + len(data)), data: data}
 	wg := sync.WaitGroup{}
 	chunkChan <- chunk
 	wg.Add(1)
 	go func() {
-		FileWriter(fname, chunkChan, errorChan, ctx)
+		FileWriter(fname, chunkChan, errorChan, completeChan, ctx)
 		wg.Done()
 	}()
 	for len(chunkChan) > 0 {
@@ -53,4 +55,5 @@ func TestWriteChunk(t *testing.T) {
 	wg.Wait()
 	mF.AssertExpectations(t)
 	mFS.AssertExpectations(t)
+	assert.Equal(t, 1, len(completeChan))
 }
